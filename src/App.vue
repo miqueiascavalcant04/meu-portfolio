@@ -93,35 +93,35 @@
 
 <!-- Seção Contato -->
 <section id="contato" class="py-5 bg-dark text-white">
-  <div class="container">
-    <h2 class="text-center mb-5">Fale Comigo</h2>
-    <div class="row justify-content-center">
-      <div class="col-md-8">
-        <form>
-          <div class="mb-3">
-            <label for="nome" class="form-label">Nome</label>
-            <input type="text" class="form-control" id="nome" placeholder="Seu nome" required>
-          </div>
-          <div class="mb-3">
-            <label for="email" class="form-label">E-mail</label>
-            <input type="email" class="form-control" id="email" placeholder="seu@email.com" required>
-          </div>
-          <div class="mb-3">
-            <label for="mensagem" class="form-label">Mensagem</label>
-            <textarea class="form-control" id="mensagem" rows="4" placeholder="Escreva sua mensagem..." required></textarea>
-          </div>
-          <button type="submit" class="btn btn-light">Enviar</button>
-        </form>
+      <div class="container">
+        <h2 class="text-center mb-5">Fale Comigo</h2>
+        <div class="row justify-content-center">
+          <div class="col-md-8">
+            <form @submit.prevent="enviarMensagem">
+              <div class="mb-3">
+                <label for="nome" class="form-label">Nome</label>
+                <input type="text" class="form-control" id="nome" v-model="form.nome" required>
+              </div>
+              <div class="mb-3">
+                <label for="email" class="form-label">E-mail</label>
+                <input type="email" class="form-control" id="email" v-model="form.email" required>
+              </div>
+              <div class="mb-3">
+                <label for="mensagem" class="form-label">Mensagem</label>
+                <textarea class="form-control" id="mensagem" rows="4" v-model="form.mensagem" required></textarea>
+              </div>
+              <button type="submit" class="btn btn-light">Enviar</button>
+            </form>
 
-        <div class="mt-4 text-center">
-          <p>Ou entre em contato por:</p>
-          <a href="miqueiascavalcante417@gmail.com" class="btn btn-outline-light me-2">E-mail</a>
-          <a href="https://wa.me/5592982158707" target="_blank" class="btn btn-outline-light">WhatsApp</a>
+            <div class="mt-4 text-center">
+              <p>Ou entre em contato por:</p>
+              <a href="mailto:miqueiascavalcante417@gmail.com" class="btn btn-outline-light me-2">E-mail</a>
+              <a href="https://wa.me/5592982158707" target="_blank" class="btn btn-outline-light">WhatsApp</a>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
-  </div>
-</section>
+    </section>
 
 <!-- Rodapé -->
 <footer class="bg-dark text-white text-center py-4">
@@ -139,21 +139,28 @@
 </footer>
 
 <button
-  id="btnTopo"
-  class="btn btn-primary position-fixed"
-  style="bottom: 30px; right: 30px; display: none; z-index: 9999;"
-  @click="voltarAoTopo"
->
-  ↑ Topo
-</button>
-
-
+      id="btnTopo"
+      class="btn btn-primary position-fixed"
+      style="bottom: 30px; right: 30px; display: none; z-index: 9999;"
+      @click="voltarAoTopo"
+    >
+      ↑ Topo
+    </button>
   </div>
 </template>
 
 <script>
 export default {
   name: 'App',
+  data() {
+    return {
+      form: {
+        nome: '',
+        email: '',
+        mensagem: ''
+      }
+    };
+  },
   mounted() {
     window.addEventListener('scroll', this.verificaScroll);
   },
@@ -163,16 +170,35 @@ export default {
     },
     verificaScroll() {
       const btn = document.getElementById('btnTopo');
-      if (window.scrollY > 300) {
-        btn.style.display = 'block';
-      } else {
-        btn.style.display = 'none';
+      btn.style.display = window.scrollY > 300 ? 'block' : 'none';
+    },
+    async enviarMensagem() {
+      try {
+        const response = await fetch('http://localhost:3000/api/mensagens', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(this.form)
+        });
+
+        const result = await response.json();
+
+        if (result.sucesso) {
+          alert('Mensagem enviada com sucesso!');
+          this.form.nome = '';
+          this.form.email = '';
+          this.form.mensagem = '';
+        } else {
+          alert('Erro ao enviar a mensagem.');
+        }
+      } catch (error) {
+        console.error(error);
+        alert('Erro ao conectar com o servidor.');
       }
     }
   }
 };
-
-
 </script>
 
 <style>
